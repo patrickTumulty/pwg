@@ -4,7 +4,6 @@
 
 #include <queue>
 #include <string>
-#include <vector>
 
 class Generator
 {

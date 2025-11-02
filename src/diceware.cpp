@@ -1,23 +1,22 @@
 
 #include "diceware.hpp"
+#include "diceware_eff_wordlist.hpp"
 #include "diceware_wordlist.hpp"
 #include "generator.hpp"
-#include <execution>
+#include <cstdint>
 #include <iostream>
+#include <iterator>
 #include <optional>
 #include <queue>
 #include <random>
 #include <sstream>
 #include <string>
+#include <sys/types.h>
 
-typedef enum {
-    DW_WORDLIST_ORIGINAL,
-    DW_WORDLIST_EFF
-} DicewareWordlist;
 
-DicewareLookup::DicewareLookup()
+static void populateWordMap(std::map<int, std::string> &map, const uint8_t *wordlist, uint32_t wordlistLen)
 {
-    std::string *words = new std::string(reinterpret_cast<const char *>(diceware_wordlist_txt), diceware_wordlist_txt_len);
+    std::string *words = new std::string(reinterpret_cast<const char *>(wordlist), wordlistLen);
 
     std::istringstream iss(*words);
     std::string line;
@@ -35,30 +34,45 @@ DicewareLookup::DicewareLookup()
 
         if (lineStream >> number >> word)
         {
-            wordMap.insert({number, word});
+            map.insert({number, word});
         }
     }
 
     delete words;
 }
 
+DicewareLookup::DicewareLookup()
+{
+    populateWordMap(originalWordMap, diceware_wordlist_txt, diceware_wordlist_txt_len);
+    populateWordMap(effWordMap, diceware_eff_wordlist_txt, diceware_eff_wordlist_txt_len);
+}
+
 DicewareLookup::~DicewareLookup()
 {
-    wordMap.clear();
+    originalWordMap.clear();
+    effWordMap.clear();
 }
 
-std::optional<std::string> DicewareLookup::lookupWord(int number)
+std::optional<std::string> DicewareLookup::lookupWord(int number, DicewareWordlist wordlist)
 {
-    return std::optional(wordMap[number]);
+    switch (wordlist)
+    {
+        case DW_WORDLIST_ORIGINAL:
+            return std::optional(originalWordMap[number]);
+        case DW_WORDLIST_EFF:
+            return std::optional(effWordMap[number]);
+        default:
+            return std::nullopt;
+    }
 }
 
-DicewareGenerator::DicewareGenerator() : Generator("diceware")
+DicewareGenerator::DicewareGenerator() : gen(rd()), dist(1, 6), Generator("diceware")
 {
 }
 
 void DicewareGenerator::processArgs(std::queue<std::string> args)
 {
-    int dicewarePasswordLen = 0;
+    int dicewarePasswordLen = 1;
     DicewareWordlist wordlist = DW_WORDLIST_ORIGINAL;
 
     while (!args.empty())
@@ -87,40 +101,42 @@ void DicewareGenerator::processArgs(std::queue<std::string> args)
         }
     }
 
-    std::cout << dicewareString(dicewarePasswordLen) << "\n";
+    std::cout << rollDicewarePassword(dicewarePasswordLen, wordlist) << "\n";
 }
 
-std::string DicewareGenerator::dicewareString(int len)
+std::string DicewareGenerator::rollDicewarePassword(int len, DicewareWordlist wordlist)
 {
-    // Create a random device and a generator
-    std::random_device rd;  // non-deterministic seed
-    std::mt19937 gen(rd()); // Mersenne Twister generator
-
-    // Define the range [1, 6]
-    std::uniform_int_distribution<int> dist(1, 6);
-
-    std::string s;
+    std::ostringstream oss;
 
     for (int i = 0; i < len; i++)
     {
-        std::string sequence;
-        for (int j = 0; j < 5; j++)
-        {
-            int diceRoll = dist(gen);
-            sequence += std::to_string(diceRoll);
-        }
-        int number = std::stoi(sequence);
-
-        auto word = dicewareLookup.lookupWord(number);
+        int number = rollDicewareID();
+        auto word = dicewareLookup.lookupWord(number, wordlist);
         if (word.has_value())
         {
-            s += word.value();
+            oss << word.value();
             if (i < len - 1)
             {
-                s += " ";
+                oss << " ";
             }
         }
     }
 
-    return s;
+    return oss.str();
+}
+
+uint8_t DicewareGenerator::diceroll()
+{
+    return dist(gen);
+}
+
+int DicewareGenerator::rollDicewareID()
+{
+    char sequence[6];
+    sequence[5] = '\0';
+    for (int i = 0; i < 5; i++)
+    {
+        sequence[i] = diceroll() + '0';
+    }
+    return std::stoi(sequence);
 }

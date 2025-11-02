@@ -1,6 +1,8 @@
 #include "diceware.hpp"
+#include "generator.hpp"
 #include <iostream>
 #include <memory>
+#include <queue>
 
 int main(int argc, char *argv[])
 {
@@ -12,7 +14,14 @@ int main(int argc, char *argv[])
 
     for (int i = 1; i < argc; i++)
     {
-        argsQueue.emplace(std::string(argv[i]));
+        argsQueue.emplace(argv[i]);
+    }
+
+    if (argsQueue.empty())
+    {
+        std::cout << "No parameters specified.\n";
+        std::cout << "Try 'pwg help' for more information.\n";
+        return 0;
     }
 
     std::string firstArg = argsQueue.front();
