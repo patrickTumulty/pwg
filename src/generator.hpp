@@ -49,6 +49,7 @@ private:
     std::string name;
     std::string description;
     std::map<std::string, std::shared_ptr<CliArg>> argsMap;
+    std::vector<std::shared_ptr<CliArg>> argsList;
 
 protected:
     void registerCliArg(CliArg arg);

@@ -15,6 +15,7 @@
  */
 #include "generator.hpp"
 #include <cstdio>
+#include <filesystem>
 #include <iostream>
 #include <memory>
 #include <sstream>
@@ -79,10 +80,27 @@ void Generator::processArgs(std::queue<std::string> &args)
     generate();
 }
 
-
 void Generator::registerCliArg(CliArg arg)
 {
-    argsMap[arg.longArg] = std::make_shared<CliArg>(arg);
+    std::shared_ptr<CliArg> cliArgPtr = std::make_shared<CliArg>(arg);
+
+    bool added = false;
+    if (!arg.longArg.empty())
+    {
+        argsMap[arg.longArg] = cliArgPtr;
+        added = true;
+    }
+
+    if (!arg.shortArg.empty())
+    {
+        argsMap[arg.shortArg] = cliArgPtr;
+        added = true;
+    }
+
+    if (added)
+    {
+        argsList.push_back(cliArgPtr);
+    }
 }
 
 std::string Generator::getHelpString()
@@ -91,12 +109,13 @@ std::string Generator::getHelpString()
     std::ostringstream oss;
 
     oss << "Usage: " << getName() << " [OPTIONS]\n";
-    oss << "\n" << getDescription() << "\n";
+    oss << "\n";
+    oss << getDescription() << "\n";
 
     oss << "Options:\n";
-    for (auto entry : argsMap)
+    for (auto entry : argsList)
     {
-        std::shared_ptr<CliArg> arg = entry.second;
+        std::shared_ptr<CliArg> arg = entry;
         oss << "  ";
         if (!arg->shortArg.empty())
         {

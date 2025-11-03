@@ -29,7 +29,7 @@
 enum DicewareCliArg
 {
     DW_CLI_LEN = 0,
-    DW_CLI_WORDLIST = 0,
+    DW_CLI_WORDLIST = 1,
 };
 
 
@@ -85,7 +85,7 @@ std::optional<std::string> DicewareLookup::lookupWord(int number, DicewareWordli
     }
 }
 
-static std::string desc = "Randomly generator a diceware passphrase.\nFor more information, visit the website. (https://diceware.dmuth.org)\n";
+static std::string desc = "Randomly generator a diceware passphrase.\nFor more information visit the website.\nhttps://diceware.dmuth.org\n";
 
 DicewareGenerator::DicewareGenerator() : gen(rd()), dist(1, 6), Generator("diceware", desc)
 {
@@ -136,24 +136,25 @@ void DicewareGenerator::generate()
 
 void DicewareGenerator::handleArg(std::shared_ptr<CliArg> arg, std::queue<std::string> &args)
 {
-    if (arg->id == DW_CLI_LEN)
+    switch (arg->id)
     {
-        dicewarePasswordLen = std::stoi(args.front());
-        args.pop();
-    }
-    else if (arg->id == DW_CLI_WORDLIST)
-    {
-        std::string wordlist = args.front();
-        args.pop();
+        case DW_CLI_LEN:
+            dicewarePasswordLen = std::stoi(args.front());
+            args.pop();
+            break;
+        case DW_CLI_WORDLIST:
+            std::string wordlist = args.front();
+            args.pop();
 
-        if (wordlist == "eff")
-        {
-            wordlist = DW_WORDLIST_EFF;
-        }
-        else if (wordlist == "original")
-        {
-            wordlist = DW_WORDLIST_ORIGINAL;
-        }
+            if (wordlist == "eff")
+            {
+                wordlist = DW_WORDLIST_EFF;
+            }
+            else if (wordlist == "original")
+            {
+                wordlist = DW_WORDLIST_ORIGINAL;
+            }
+            break;
     }
 }
 
