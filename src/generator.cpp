@@ -15,7 +15,6 @@
  */
 #include "generator.hpp"
 #include <cstdio>
-#include <filesystem>
 #include <iostream>
 #include <memory>
 #include <sstream>

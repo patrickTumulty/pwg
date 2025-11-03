@@ -16,32 +16,12 @@
 #ifndef DICEWARE_WORDS_H
 #define DICEWARE_WORDS_H
 
+#include "diceware_lookup.hpp"
 #include "generator.hpp"
 #include <cstdint>
-#include <map>
-#include <optional>
 #include <random>
 #include <string>
 
-
-enum DicewareWordlist
-{
-    DW_WORDLIST_ORIGINAL,
-    DW_WORDLIST_EFF
-};
-
-class DicewareLookup
-{
-public:
-    DicewareLookup();
-    ~DicewareLookup();
-
-    std::optional<std::string> lookupWord(int number, DicewareWordlist wordlist);
-
-private:
-    std::map<int, std::string> originalWordMap;
-    std::map<int, std::string> effWordMap;
-};
 
 class DicewareGenerator : public Generator
 {

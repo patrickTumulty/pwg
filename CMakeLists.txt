@@ -24,11 +24,14 @@ include_directories(src resources)
 
 file(GLOB SOURCES
     src/main.cpp
-    src/diceware.cpp
+    src/diceware_generator.cpp
+    src/diceware_lookup.cpp
     src/generator.cpp
     resources/diceware_wordlist.cpp
     resources/diceware_eff_wordlist.cpp
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES})
+
+install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
 

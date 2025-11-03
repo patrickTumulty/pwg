@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "diceware.hpp"
+#include "diceware_generator.hpp"
 #include "generator.hpp"
 #include "version.h"
 #include <iostream>
