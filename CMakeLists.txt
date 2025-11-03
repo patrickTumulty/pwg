@@ -10,13 +10,19 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+configure_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/resources/version.h.in"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/version.h"
+    @ONLY
+)
+
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Debug CACHE STRING "Build type" FORCE)
 endif()
 
 include_directories(src resources)
 
-file(GLOB SOURCES 
+file(GLOB SOURCES
     src/main.cpp
     src/diceware.cpp
     src/generator.cpp
