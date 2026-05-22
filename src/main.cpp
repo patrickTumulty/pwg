@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
     if (argsQueue.empty())
     {
         std::cout << "No parameters specified.\n";
-        std::cout << "Try 'pwg help' for more information.\n";
+        std::cout << "Try 'pwg --help' for more information.\n";
         return 0;
     }
 
